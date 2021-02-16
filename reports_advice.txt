@@ -1,0 +1,12 @@
+What are we looking for from the reports?
+
+SCIENCE STUFF
+- Telling story with data (shows understanding of data and issue)
+- Multiple scientific sources cited (not just news articles, read scholarly papers)
+
+PROGRAMMING STUFF
+- Proficiency in navigating R programming
+- Cohesive, understandable graphs (is your x variable called "x" or does it have a title/name?)
+- Multiple types of graphs (not just bar charts, really think of the best ways to display data)
+-- Bonus points for animation?
+

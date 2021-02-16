@@ -1,0 +1,5 @@
+What do we need to do?
+- Better understand how to access database, CSVs, and how the data is structured
+- Finish playing around with data to show it is possible (different ideas to do with data)
+- Make new R Markdown for additional days
+- Revamp old curriculum if time (and as necessary)
