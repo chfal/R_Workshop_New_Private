@@ -1,0 +1,60 @@
+---
+title: "HIV_Project"
+author: "chfal"
+date: "3/5/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Example Project I: HIV Prevalence
+
+This document serves as a guide. 
+
+```{r}
+library(tidyverse) # for data reading, cleaning, and visualization
+library(scales) # for prettifying graph
+```
+
+```{r}
+hiv <- read_csv("annual_hiv_deaths_number_all_ages.csv")
+
+hiv_longer <- hiv %>%
+  pivot_longer(2:23, names_to="year", values_to="deaths")
+```
+
+
+# This graph shows HIV in Nigeria
+
+```{r}
+hiv_longer %>%
+  filter(country=="Nigeria") %>%
+  ggplot(aes(x=year, y=deaths)) +
+  geom_point() + 
+  scale_x_discrete(breaks=pretty_breaks(n=10)) # make pretty breaks  - 10 year gaps
+
+```
+
+
+# This graph shows HIV in America
+
+```{r}
+hiv_longer %>%
+  filter(country=="United States") %>%
+  ggplot(aes(x=year, y=deaths)) +
+  geom_point() + 
+  scale_x_discrete(breaks=pretty_breaks(n=10)) # make pretty breaks  - 10 year gaps
+
+```
+
+
+```{r}
+avg_deaths <- hiv_longer %>%
+  group_by(country) %>%
+  summarize(mean(deaths)) %>%
+  arrange(desc("deaths"))
+
+
+```

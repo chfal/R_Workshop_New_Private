@@ -1,0 +1,107 @@
+---
+title: "Day 4: Going Global"
+author: "Cleo Falvey & Filip Stefanovic"
+date: "2/23/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Hello, World (literally!)
+
+Since we can't travel due to Covid-19, we are going to do some (virtual) travel. Let's make some maps in R! By the end of this session, you will learn to make fun and visually engaging maps using the *rworldmap* package. First, we have to load all necessary libraries.
+
+```{r}
+library(tidyverse) # for cleaning data
+library(sf) # for using shapefiles
+library(rworldmap) # for the world map
+library(gapminder) # for country codes
+```
+
+# An Example Map
+
+When we have global data like we do currently, it's important to be able to visualize what is happening with it, typically on a map.
+
+Today, we'll be using the *rworldmaps* package, developed by Andy South, to make a map. The function we will be using, once we have organized our data, is the function below. The example is provided by the package authors and shows a heat map of the world's population size.
+
+```{r}
+mapCountryData()
+```
+
+# Our Data
+
+We're going to be using data from GapMinder for this next section, similarly to what you will be doing for your assignment / presentation (whatever you so choose).
+
+I've chosen to graph life expectancy!
+
+```{r}
+
+life_expectancy <- read_csv("life_expectancy_years.csv")
+
+head(life_expectancy)
+
+```
+
+We can see that the structure of the data seems to show the country, year, and life expectancy. We will want to clean this, and select only one year to map. Let's select 2021. One way to do this is to pivot the data so that it is *longer*. This will mean we will have a data set that looks something like this, with country, year, and life expectancy paired together.
+
+To do this, we are going to use *pivot_longer()*. The first argument of the function takes the columns that we are pivoting (below, 2:302 is the index of the columns. If you look at the original dataset, you will see that those are all the years for which life expectancy was predicted by GapMinder. Remember, arrays in R start at 1.) The next argument tells us what we are going to rename the names and values of the data set!
+
+```{r}
+life_expectancy2 <- life_expectancy %>%
+  pivot_longer(2:302,names_to = "year", values_to="life_expectancy")
+
+head(life_expectancy2)
+```
+
+We've now pivoted our data, which is great because we can now select by year and then map it to the world. I've selected only the countries which had an estimate of population size for the year 2021.
+
+```{r}
+life_expectancy3 <- life_expectancy2 %>%
+  filter(year==2021)
+
+head(life_expectancy3)
+
+```
+
+Another thing we need to do is we need to associate our country name data with its respective ISO code using the *country_codes* data set from the Gap Minder package. ISO codes are a standardized alphanumeric system to refer to countries. If we left this step out, it would be more difficult to map it with the *rworldmap* package later on.
+
+```{r}
+life_expectancy4 <- left_join(x=life_expectancy3, y=country_codes, by=c("country"="country"))
+
+
+```
+
+Now we are going to join our country map data and our life expectancy data together to map it. This is going to be a little bit different than doing a left, right, or full join than before because this package seems to have its own joining function called *joinCountry2Datamap()*. The arguments are the data frame that we are joining, what country identifier we are joining by (the ISO-3166 code is what I am using), and what name that column is.
+
+```{r}
+map_this <- joinCountryData2Map(dF = life_expectancy4, joinCode="ISO3", nameJoinColumn = "iso_alpha")
+
+```
+
+To check if our joining function worked, we will run the *class()* function on our object called *map_this*. We should see that it is a spatial polygons data frame, meaning that we have now successfully joined our information about our countries (lifespan and year) to the shapefiles of the countries, so we can graph them on a map.
+
+```{r}
+class(map_this)
+```
+
+We can then use the function *mapCountryData()* to map our new map. If you want to customize the graph, something that can be helpful is typing the function name and hitting the tab button so you can see what arguments can be put into the function to customize it. You can also type help(mapCountryData) to view their help page and look at all of the arguments.
+
+```{r}
+mapCountryData(mapToPlot = map_this, nameColumnToPlot = "life_expectancy", mapTitle = "Global Life Expectancy in 2021", colourPalette="negpos8")
+```
+
+This map looks really interesting! We can see that the life expectancy ranges by country, with certain regions of the world having much lower life expectancy than others.
+
+One drawback to maps, especially global maps, is the fact that although the data is all there, it can be hard to zoom in on different areas of the map. Luckily, the package has recognized this and allowed the argument mapRegion, which takes character vectors of different continents.
+
+```{r}
+mapCountryData(mapToPlot = map_this, nameColumnToPlot = "life_expectancy", mapRegion = "Africa", mapTitle = "Life Expectancy in Africa", colourPalette="negpos8")
+```
+
+You might have noticed that this mapping package is slightly different than *ggplot2*. There are multiple ways to map things in R, but this package is probably (in my opinion) pretty useful and intuitive.
+
+Let's try another example! What if we wanted to map something else? Let's make one together.
+
+# A Second Map
